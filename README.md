@@ -188,6 +188,17 @@ google:
       name: Docs
       mime_type: application/vnd.google-apps.folder
       parent_ids: [root]
+
+linkedin:
+  users:
+    - email: testuser@linkedin.com
+      name: Test User
+  oauth_clients:
+    - client_id: my-linkedin-client-id
+      client_secret: my-linkedin-client-secret
+      name: My LinkedIn App
+      redirect_uris:
+        - http://localhost:3000/api/auth/callback/linkedin
 ```
 
 ## OAuth & Integrations
@@ -219,6 +230,20 @@ github:
 ```
 
 If no `oauth_apps` are configured, the emulator accepts any `client_id` (backward-compatible). With apps configured, strict validation is enforced.
+
+### LinkedIn OAuth
+
+```yaml
+linkedin:
+  oauth_clients:
+    - client_id: "my-linkedin-client-id"
+      client_secret: "my-linkedin-client-secret"
+      name: "My LinkedIn App"
+      redirect_uris:
+        - "http://localhost:3000/api/auth/callback/linkedin"
+```
+
+LinkedIn uses the same strict validation pattern. If `oauth_clients` are configured, `client_id`, `client_secret`, and `redirect_uri` are all validated.
 
 ### GitHub Apps
 
@@ -452,6 +477,19 @@ This stays under a single `google:` service because the Gmail API is used by bot
 
 The Google plugin still does not cover every Google API edge case, but Gmail, Calendar, and Drive now have enough mutable surface to support realistic local automation flows without stuffing everything into static seed config.
 
+## LinkedIn OAuth (OpenID Connect)
+
+Sign In with LinkedIn using OpenID Connect. Matches the surface used by Better Auth, Auth.js, and other OIDC-aware libraries.
+
+- `GET /.well-known/openid-configuration` - OIDC discovery document
+- `GET /oauth2/v3/certs` - JSON Web Key Set (JWKS)
+- `GET /oauth/v2/authorization` - authorization endpoint (renders user picker)
+- `POST /oauth/v2/accessToken` - token exchange (`authorization_code`, `refresh_token`)
+- `GET /v2/userinfo` - user profile (`sub`, `name`, `given_name`, `family_name`, `picture`, `locale`, `email`, `email_verified`)
+- `POST /oauth/v2/revoke` - token revocation
+
+Supports PKCE (plain + S256), `client_secret_post`, and `client_secret_basic` authentication.
+
 ## Architecture
 
 ```
@@ -462,6 +500,7 @@ packages/
     vercel/         # Vercel API service
     github/         # GitHub API service
     google/         # Google OAuth 2.0 / OIDC + Gmail, Calendar, and Drive APIs
+    linkedin/       # LinkedIn OAuth 2.0 / OpenID Connect
 apps/
   web/              # Documentation site (Next.js)
 ```
