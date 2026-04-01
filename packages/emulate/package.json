@@ -62,6 +62,7 @@
     "@emulators/microsoft": "workspace:*",
     "@emulators/aws": "workspace:*",
     "@emulators/google": "workspace:*",
+    "@emulators/linkedin": "workspace:*",
     "@emulators/slack": "workspace:*",
     "@emulators/vercel": "workspace:*",
     "tsup": "^8",
